@@ -1,0 +1,659 @@
+{
+  "service": {
+    "service": "forex-rpmeer",
+    "serviceObject": {
+      "name": "forex-rpmeer"
+    },
+    "provider": {
+      "stage": "dev",
+      "region": "ap-southeast-1",
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}",
+      "name": "aws",
+      "runtime": "nodejs6.10",
+      "environment": {
+        "CLIENT_ID": "305592088162.324003916674",
+        "CLIENT_SECRET": "d29e8f9c1045d7602ae992d50e2fd755",
+        "VERIFICATION_TOKEN": "hT5pbDLvxgXPXbUhiVnCjXx1",
+        "INSTALL_ERROR_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#error",
+        "INSTALL_SUCCESS_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#success",
+        "NAMESPACE": "forex-rpmeer-dev",
+        "TEAMS_TABLE": "forex-rpmeer-dev-teams"
+      },
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:GetItem",
+            "dynamodb:PutItem"
+          ],
+          "Resource": [
+            "arn:aws:dynamodb:*:*:table/forex-rpmeer-dev-teams"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "lambda:invokeFunction"
+          ],
+          "Resource": [
+            "arn:aws:lambda:*:*:function:forex-rpmeer-dev-actions"
+          ]
+        }
+      ],
+      "versionFunctions": true,
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          },
+          "ActionsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/forex-rpmeer-dev-actions"
+            }
+          },
+          "EventsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/forex-rpmeer-dev-events"
+            }
+          },
+          "InstallLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/forex-rpmeer-dev-install"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "dev",
+                        "forex-rpmeer",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-actions:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-events:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-install:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-actions:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-events:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/forex-rpmeer-dev-install:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][1]"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "forex-rpmeer",
+                    "dev",
+                    "ap-southeast-1",
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "ActionsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/forex-rpmeer/dev/1520040583528-2018-03-03T01:29:43.528Z/forex-rpmeer.zip"
+              },
+              "FunctionName": "forex-rpmeer-dev-actions",
+              "Handler": "actions.handler",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CLIENT_ID": "305592088162.324003916674",
+                  "CLIENT_SECRET": "d29e8f9c1045d7602ae992d50e2fd755",
+                  "VERIFICATION_TOKEN": "hT5pbDLvxgXPXbUhiVnCjXx1",
+                  "INSTALL_ERROR_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#error",
+                  "INSTALL_SUCCESS_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#success",
+                  "NAMESPACE": "forex-rpmeer-dev",
+                  "TEAMS_TABLE": "forex-rpmeer-dev-teams"
+                }
+              }
+            },
+            "DependsOn": [
+              "ActionsLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "ActionsLambdaVersionZQ3eRtTbTOCZ30Q2bgTUSt69EXixoxFZtshrVAfEc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ActionsLambdaFunction"
+              },
+              "CodeSha256": "pMt1qyx3LpbOI2UvphZt5h2hCd4VHoscFJ3lNiidVRM="
+            }
+          },
+          "EventsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/forex-rpmeer/dev/1520040583528-2018-03-03T01:29:43.528Z/forex-rpmeer.zip"
+              },
+              "FunctionName": "forex-rpmeer-dev-events",
+              "Handler": "events.handler",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CLIENT_ID": "305592088162.324003916674",
+                  "CLIENT_SECRET": "d29e8f9c1045d7602ae992d50e2fd755",
+                  "VERIFICATION_TOKEN": "hT5pbDLvxgXPXbUhiVnCjXx1",
+                  "INSTALL_ERROR_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#error",
+                  "INSTALL_SUCCESS_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#success",
+                  "NAMESPACE": "forex-rpmeer-dev",
+                  "TEAMS_TABLE": "forex-rpmeer-dev-teams"
+                }
+              }
+            },
+            "DependsOn": [
+              "EventsLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "EventsLambdaVersionvmupP4fGZ6W8FnZD4FnZOqiswiuHABvd6OaAZRy0": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "EventsLambdaFunction"
+              },
+              "CodeSha256": "pMt1qyx3LpbOI2UvphZt5h2hCd4VHoscFJ3lNiidVRM="
+            }
+          },
+          "InstallLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/forex-rpmeer/dev/1520040583528-2018-03-03T01:29:43.528Z/forex-rpmeer.zip"
+              },
+              "FunctionName": "forex-rpmeer-dev-install",
+              "Handler": "install.handler",
+              "MemorySize": 1024,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "Runtime": "nodejs6.10",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CLIENT_ID": "305592088162.324003916674",
+                  "CLIENT_SECRET": "d29e8f9c1045d7602ae992d50e2fd755",
+                  "VERIFICATION_TOKEN": "hT5pbDLvxgXPXbUhiVnCjXx1",
+                  "INSTALL_ERROR_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#error",
+                  "INSTALL_SUCCESS_URL": "http://forex-rpmeer.s3-website-ap-southeast-1.amazonaws.com/#success",
+                  "NAMESPACE": "forex-rpmeer-dev",
+                  "TEAMS_TABLE": "forex-rpmeer-dev-teams"
+                }
+              }
+            },
+            "DependsOn": [
+              "InstallLogGroup",
+              "IamRoleLambdaExecution"
+            ]
+          },
+          "InstallLambdaVersionnDlQ7bvAQ4nr4sEGPZ6zxRWLGzrSasqnPt1m8HQQs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "InstallLambdaFunction"
+              },
+              "CodeSha256": "pMt1qyx3LpbOI2UvphZt5h2hCd4VHoscFJ3lNiidVRM="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "dev-forex-rpmeer",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              }
+            }
+          },
+          "ApiGatewayResourceEvents": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "events",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceInstall": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "install",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodEventsPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceEvents"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "EventsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayMethodInstallGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceInstall"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "InstallLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayDeployment1520040583544": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "dev"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodEventsPost",
+              "ApiGatewayMethodInstallGet"
+            ]
+          },
+          "EventsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "EventsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "InstallLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "InstallLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "TeamsDynamoDbTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "forex-rpmeer-dev-teams",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "team_id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "team_id",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 5,
+                "WriteCapacityUnits": 5
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          },
+          "ActionsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ActionsLambdaVersionZQ3eRtTbTOCZ30Q2bgTUSt69EXixoxFZtshrVAfEc"
+            }
+          },
+          "EventsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "EventsLambdaVersionvmupP4fGZ6W8FnZD4FnZOqiswiuHABvd6OaAZRy0"
+            }
+          },
+          "InstallLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "InstallLambdaVersionnDlQ7bvAQ4nr4sEGPZ6zxRWLGzrSasqnPt1m8HQQs"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.ap-southeast-1.amazonaws.com/dev"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket"
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "custom": {
+      "namespace": "forex-rpmeer-dev",
+      "stage": "dev"
+    },
+    "functions": {
+      "actions": {
+        "handler": "actions.handler",
+        "events": [],
+        "name": "forex-rpmeer-dev-actions",
+        "package": {},
+        "vpc": {}
+      },
+      "events": {
+        "handler": "events.handler",
+        "events": [
+          {
+            "http": {
+              "path": "events",
+              "method": "post",
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "forex-rpmeer-dev-events",
+        "package": {},
+        "vpc": {}
+      },
+      "install": {
+        "handler": "install.handler",
+        "events": [
+          {
+            "http": {
+              "path": "install",
+              "method": "get",
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "forex-rpmeer-dev-install",
+        "package": {},
+        "vpc": {}
+      }
+    },
+    "resources": {
+      "Resources": {
+        "TeamsDynamoDbTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "forex-rpmeer-dev-teams",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "team_id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "team_id",
+                "KeyType": "HASH"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 5,
+              "WriteCapacityUnits": 5
+            }
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "artifact": "C:\\Users\\student\\forex-rpmeer\\.serverless\\forex-rpmeer.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/forex-rpmeer/dev/1520040583528-2018-03-03T01:29:43.528Z",
+    "artifact": "forex-rpmeer.zip"
+  }
+}
